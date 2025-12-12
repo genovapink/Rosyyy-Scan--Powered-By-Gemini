@@ -13,6 +13,7 @@ interface ProfileProps {
 export default function Profile({ user, onLogout }: ProfileProps) {
   return (
     <div className="min-h-screen p-4 pt-6 pb-24">
+      {/* Header */}
       <div className="text-center mb-6">
         <div className="w-20 h-20 mx-auto mb-3">
           <img src={rosyLogo} alt="Rosy" className="w-full h-full object-contain drop-shadow-lg" />
@@ -24,6 +25,7 @@ export default function Profile({ user, onLogout }: ProfileProps) {
         <p className="text-gray-600">View your progress and collection</p>
       </div>
 
+      {/* Profile card */}
       <Card className="max-w-md mx-auto p-6 mb-6 rounded-3xl shadow-xl">
         <div className="flex items-start gap-4 mb-6">
           <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white shadow-lg">
@@ -35,7 +37,7 @@ export default function Profile({ user, onLogout }: ProfileProps) {
               <Mail className="w-4 h-4" />
               <span className="text-gray-600">{user.email}</span>
             </div>
-            {user.badges.includes('badge-warrior') && (
+            {user.badges?.includes?.('badge-warrior') && (
               <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-lg">
                 <Award className="w-3 h-3 mr-1" />
                 Eco-Warrior
@@ -56,7 +58,7 @@ export default function Profile({ user, onLogout }: ProfileProps) {
             <div className="flex items-center justify-center gap-1 mb-1">
               <Sparkles className="w-6 h-6 text-purple-500" />
             </div>
-            <p className="text-gray-900 mb-1">{user.badges.length}</p>
+            <p className="text-gray-900 mb-1">{user.badges?.length ?? 0}</p>
             <p className="text-gray-600">Badges</p>
           </div>
           <div className="text-center bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-2xl">
@@ -69,6 +71,7 @@ export default function Profile({ user, onLogout }: ProfileProps) {
         </div>
       </Card>
 
+      {/* Achievement progress */}
       <Card className="max-w-md mx-auto p-6 mb-6 rounded-3xl shadow-xl">
         <h2 className="text-gray-900 mb-4">Achievement Progress</h2>
         <div className="space-y-4">
