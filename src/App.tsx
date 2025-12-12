@@ -5,6 +5,7 @@ import MapScreen from './components/MapScreen';
 import Profile from './components/Profile';
 import RewardsShop from './components/RewardsShop';
 import Navigation from './components/Navigation';
+import FloatingChatbot from './components/FloatingChatbot';
 import { Toaster } from './components/ui/sonner';
 
 export interface User {
@@ -13,7 +14,6 @@ export interface User {
   points: number;
   deposits: number;
   badges: string[];
-  nfts: string[];
   avatar?: string;
 }
 
@@ -80,6 +80,8 @@ export default function App() {
           <Profile user={user!} onLogout={handleLogout} />
         )}
       </div>
+
+      <FloatingChatbot />
 
       {/* Navigation */}
       <Navigation currentScreen={currentScreen} onNavigate={setCurrentScreen} />

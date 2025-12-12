@@ -102,8 +102,8 @@ export default function MapScreen() {
     <div className="h-screen flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm p-4 z-10">
-        <h1 className="text-emerald-600 text-center mb-1">Bank Sampah</h1>
-        <p className="text-gray-600 text-center">Temukan lokasi Bank Sampah terdekat</p>
+        <h1 className="text-emerald-600 text-center mb-1">Waste Banks</h1>
+        <p className="text-gray-600 text-center">Find nearby waste banks</p>
       </div>
 
       {/* Map */}
@@ -121,7 +121,7 @@ export default function MapScreen() {
 
       {/* Bank List */}
       <div className="bg-white border-t border-gray-200 p-4 max-h-72 overflow-y-auto">
-        <h2 className="mb-3 text-gray-700">Daftar Bank Sampah</h2>
+        <h2 className="mb-3 text-gray-700">Waste Bank List</h2>
         <div className="space-y-2">
           {bankSampahLocations.map((bank) => (
             <Card
@@ -150,7 +150,7 @@ export default function MapScreen() {
                       e.stopPropagation();
                       handleOpenInMaps(bank);
                     }}
-                    title="Buka di Google Maps"
+                    title="Open in Google Maps"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </Button>
@@ -161,7 +161,7 @@ export default function MapScreen() {
                       handleGetDirections(bank);
                     }}
                     className="bg-emerald-500 hover:bg-emerald-600"
-                    title="Petunjuk Arah"
+                    title="Get directions"
                   >
                     <Navigation className="h-4 w-4" />
                   </Button>

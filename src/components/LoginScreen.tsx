@@ -23,38 +23,44 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 
   const handleSendCode = () => {
     if (!email || !email.includes('@gmail.com')) {
-      toast.error('Mohon masukkan email Gmail yang valid');
+      toast.error('Please enter a valid Gmail address');
       return;
     }
 
-    // Generate random 6-digit code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedCode(code);
-    setStep('verify');
-    
-    // Simulate sending email
-    toast.success(`Kode verifikasi telah dikirim ke ${email}`, {
-      description: `Kode Anda: ${code} (Demo Mode)`
-    });
+    // Request backend to send verification code via Gmail
+    fetch('http://localhost:4000/api/send-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.ok) {
+          toast.success(`Verification code sent to ${email}`);
+          setStep('verify');
+        } else {
+          toast.error(d?.error || 'Failed to send code');
+        }
+      })
+      .catch(() => toast.error('Failed to send code'));
   };
 
   const handleVerifyCode = () => {
-    if (verificationCode === generatedCode) {
-      const userName = email.split('@')[0];
-      const newUser: User = {
-        email,
-        name: userName,
-        points: 0,
-        deposits: 0,
-        badges: [],
-        nfts: [],
-      };
-      
-      toast.success('Berhasil login! Selamat datang di Rosy ');
-      onLogin(newUser);
-    } else {
-      toast.error('Kode verifikasi salah. Silakan coba lagi.');
-    }
+    fetch('http://localhost:4000/api/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code: verificationCode }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.ok && d.user) {
+          toast.success('Logged in successfully! Welcome to Rosy');
+          onLogin({ ...d.user, badges: [] });
+        } else {
+          toast.error(d?.error || 'Invalid code');
+        }
+      })
+      .catch(() => toast.error('Verification failed'));
   };
 
   return (
@@ -70,14 +76,14 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             Rosy
             <Sparkles className="w-6 h-6" />
           </h1>
-          <p className="text-gray-600">Scan. Pilah. Setor. Dapatkan Reward! </p>
+          <p className="text-gray-600">Scan. Sort. Deposit. Earn rewards!</p>
         </div>
 
         {/* Initial Step */}
         {step === 'initial' && (
           <div className="space-y-4">
             <p className="text-center text-gray-700 mb-6">
-              Masuk dengan akun Google Anda untuk mulai mengumpulkan poin dan reward! 
+              Sign in with your Gmail to start collecting points and rewards!
             </p>
             <Button
               onClick={handleGoogleLogin}
@@ -85,7 +91,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               size="lg"
             >
               <Mail className="mr-2 h-5 w-5" />
-              Masuk dengan Google
+              Sign in with Google
             </Button>
           </div>
         )}
@@ -94,7 +100,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         {step === 'email' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-700 mb-2">Email Gmail </label>
+              <label className="block text-gray-700 mb-2">Gmail address</label>
               <Input
                 type="email"
                 placeholder="nama@gmail.com"
@@ -108,14 +114,14 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-2xl shadow-lg"
               size="lg"
             >
-              Kirim Kode Verifikasi 
+              Send Verification Code
             </Button>
             <Button
               onClick={() => setStep('initial')}
               variant="ghost"
               className="w-full rounded-2xl"
             >
-              Kembali
+              Back
             </Button>
           </div>
         )}
@@ -124,20 +130,18 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         {step === 'verify' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-700 mb-2">Kode Verifikasi </label>
-              <p className="text-gray-600 mb-4">
-                Kami telah mengirim kode 6 digit ke {email}
-              </p>
+              <label className="block text-gray-700 mb-2">Verification Code</label>
+              <p className="text-gray-600 mb-4">A 6-digit verification code has been sent to {email}</p>
               <Input
                 type="text"
-                placeholder="Masukkan kode 6 digit"
+                placeholder="Enter 6-digit code"
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
                 maxLength={6}
                 className="w-full text-center tracking-widest rounded-2xl"
               />
               <p className="text-emerald-600 mt-2 text-center bg-emerald-50 p-3 rounded-2xl">
-                Demo: Kode Anda adalah <strong>{generatedCode}</strong>
+                Demo note: in local development the code will be sent to your Gmail inbox.
               </p>
             </div>
             <Button
@@ -145,14 +149,14 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-2xl shadow-lg"
               size="lg"
             >
-              Verifikasi & Masuk 
+              Verify & Sign In
             </Button>
             <Button
               onClick={() => setStep('email')}
               variant="ghost"
               className="w-full rounded-2xl"
             >
-              Kembali
+              Back
             </Button>
           </div>
         )}

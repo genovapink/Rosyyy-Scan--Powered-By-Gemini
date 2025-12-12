@@ -9,6 +9,7 @@ interface UploadProofProps {
 
 export default function UploadProof({ onUploadSuccess }: UploadProofProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -16,31 +17,47 @@ export default function UploadProof({ onUploadSuccess }: UploadProofProps) {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Ukuran file terlalu besar. Maksimal 5MB');
+        toast.error('File is too large. Max 5MB');
         return;
       }
 
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result as string);
+        setSelectedFile(file);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleUpload = () => {
-    if (!previewImage) {
-      toast.error('Pilih foto bukti setoran terlebih dahulu');
+    if (!previewImage || !selectedFile) {
+      toast.error('Please choose a proof image first');
       return;
     }
-
     setIsUploading(true);
 
-    // Simulate upload process
-    setTimeout(() => {
-      setIsUploading(false);
-      onUploadSuccess();
-    }, 1500);
+    const fd = new FormData();
+    fd.append('image', selectedFile as File);
+
+    fetch('http://localhost:4000/api/upload-proof', {
+      method: 'POST',
+      body: fd,
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        setIsUploading(false);
+        if (d?.ok) {
+          toast.success(d.message || 'Proof accepted. +50 points');
+          onUploadSuccess();
+        } else {
+          toast.error(d?.message || 'Proof not accepted');
+        }
+      })
+      .catch(() => {
+        setIsUploading(false);
+        toast.error('Upload failed');
+      });
   };
 
   return (
@@ -55,12 +72,12 @@ export default function UploadProof({ onUploadSuccess }: UploadProofProps) {
 
       <div className="text-center space-y-2 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-2xl">
         <p className="text-gray-700">
-          📸 Upload foto <strong>buku tabungan</strong> atau <strong>bukti transaksi</strong> dari Bank Sampah
+          📸 Upload a photo of your bank book or transaction receipt from the waste bank
         </p>
         <div className="flex items-center justify-center gap-2 text-emerald-600">
           <span className="text-2xl"></span>
           <p>
-            Dapatkan <strong>+50 poin</strong> setiap setoran!
+            Earn <strong>+50 points</strong> per deposit!
           </p>
           <span className="text-2xl"></span>
         </div>
@@ -74,16 +91,16 @@ export default function UploadProof({ onUploadSuccess }: UploadProofProps) {
           <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <ImageIcon className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-700 mb-1"> Klik untuk upload foto</p>
-          <p className="text-gray-500">PNG, JPG (Maks. 5MB)</p>
+          <p className="text-gray-700 mb-1">Click to upload photo</p>
+          <p className="text-gray-500">PNG, JPG (Max 5MB)</p>
         </div>
       ) : (
         <div className="space-y-3">
           <div className="relative rounded-3xl overflow-hidden border-4 border-emerald-500 shadow-lg">
-            <img src={previewImage} alt="Bukti setoran" className="w-full h-64 object-cover" />
+            <img src={previewImage} alt="Proof" className="w-full h-64 object-cover" />
             <div className="absolute top-3 right-3 bg-emerald-500 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
               <CheckCircle className="w-5 h-5" />
-              <span>Siap Upload! ✓</span>
+              <span>Ready to upload ✓</span>
             </div>
           </div>
           <Button
@@ -92,7 +109,7 @@ export default function UploadProof({ onUploadSuccess }: UploadProofProps) {
             className="w-full rounded-2xl border-2 border-emerald-300"
           >
             <FileText className="mr-2 h-4 w-4" />
-            Ganti Foto 
+            Change Photo
           </Button>
         </div>
       )}
@@ -107,12 +124,12 @@ export default function UploadProof({ onUploadSuccess }: UploadProofProps) {
           {isUploading ? (
             <>
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-              Mengupload... 
+              Uploading...
             </>
           ) : (
             <>
               <Upload className="mr-2 h-4 w-4" />
-              Konfirmasi Upload 
+              Confirm Upload
             </>
           )}
         </Button>
@@ -121,7 +138,7 @@ export default function UploadProof({ onUploadSuccess }: UploadProofProps) {
       <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl p-4">
         <p className="text-blue-800 flex items-start gap-2">
           <span className="text-xl"></span>
-          <span><strong>Tips:</strong> Pastikan foto jelas dan terlihat detail transaksi/tanggal untuk verifikasi</span>
+          <span><strong>Tips:</strong> Make sure the photo is clear and the transaction details/date are visible for verification</span>
         </p>
       </div>
     </div>
